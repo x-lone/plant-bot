@@ -1,0 +1,3 @@
+MD_MAX72XX
+Adafruit DHT sensor library
+Adafruit Unified Sensor
