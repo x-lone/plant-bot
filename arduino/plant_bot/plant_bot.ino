@@ -11,6 +11,8 @@
 
 MD_MAX72XX matrix = MD_MAX72XX(HARDWARE_TYPE, DIN_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 
+byte A[6] = {0b00000000, 0b01000010, 0b00001000, 0b10000001, 0b01111110, 0b00000000};
+
 #define DHTPIN 9
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
@@ -19,6 +21,23 @@ DHT dht(DHTPIN, DHTTYPE);
 
 char buffer[64];
 byte index = 0;
+
+int matrixPixelOffset(int size, int pos, bool flip) {
+  return flip ? (size - 1 - pos) : pos;
+}
+
+void drawBitmap(byte *image, int image_width, int image_height, int xPos, int yPos) {
+  for (int row = 0; row < image_height; row++) {
+    for (int col = 0; col < image_width; col++) {
+      bool pixel = bitRead(image[row], col);
+
+      int x = matrixPixelOffset(image_width, col, true) + xPos;
+      int y = matrixPixelOffset(image_height, row, true) + yPos;
+
+      matrix.setPoint(y, x, pixel);
+    }
+  }
+}
 
 void handleCommand(char *cmd) {
   while (*cmd == ' ') cmd++;
@@ -40,12 +59,10 @@ void handleCommand(char *cmd) {
     Serial.println(soil);
   }
   else if (strcmp(cmd, "DRAW") == 0) {
-    if (matrix.getPoint(1,1)) {
-      matrix.setPoint(1, 1, false);
-      Serial.println("OK,DRAW,MATRIX(1,1)OFF");
+    if (!matrix.getPoint(0,0)) {
+      // drawBitmap(A, 3, 3, 0, 0);
     } else {
-      matrix.setPoint(1, 1, true);
-      Serial.println("OK,DRAW,MATRIX(1,1)ON");
+      matrix.clear();
     }
   }
   else if (strncmp(cmd, "TEXT ", 5) == 0) {
@@ -66,6 +83,7 @@ void setup() {
   matrix.begin();
   matrix.control(MD_MAX72XX::INTENSITY, 5);
   matrix.clear();
+  drawBitmap(A, 8, 6, 0, 0);
 
   dht.begin();
 
