@@ -16,12 +16,20 @@ while True:
 ser.reset_input_buffer()
 ser.reset_output_buffer()
 
+skip = False
+
 while True:
     line = ser.readline().decode(errors='ignore').strip()
     if line:
-        print("ARDUINO:", line)
+        if line.startswith("RETURNED:"):
+            cmd = "DISPLAY:SOIL:" + line[9:].split(",")[2]
+            print("test:" + cmd)
+            skip = True
 
-    cmd = input("> ").strip()
+    if not skip:
+        cmd = input("> ").strip()
+    if skip:
+        skip = False
 
     if cmd == "":
         continue
