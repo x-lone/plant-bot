@@ -7,6 +7,10 @@ baud = int(os.getenv("BAUD_RATE", "9600"))
 
 ser = serial.Serial(port, baud, timeout=0.1)
 
+start_time = time.time()
+
+temp_sum = hum_sum = soil_sum = count = 0
+
 while True:
     line = ser.readline().decode(errors='ignore').strip()
     if line == "READY":
@@ -16,25 +20,34 @@ while True:
 ser.reset_input_buffer()
 ser.reset_output_buffer()
 
-skip = False
-
 while True:
     line = ser.readline().decode(errors='ignore').strip()
+
     if line:
-        if line.startswith("RETURNED:"):
-            cmd = "DISPLAY:SOIL:" + line[9:].split(",")[2]
-            print("test:" + cmd)
-            skip = True
+        try:
+            protocol, payload = line.split(":", 1)
 
-    if not skip:
-        cmd = input("> ").strip()
-    if skip:
-        skip = False
+            if protocol == "SENSOR_DATA":
+                temp, hum, soil = map(float, payload.split(","))
 
-    if cmd == "":
-        continue
+                temp_sum += temp
+                hum_sum += hum
+                soil_sum += soil
+                count += 1
 
-    if cmd:
-        ser.write((cmd + "\n").encode())
+        except ValueError:
+            continue
+
+    if time.time() - start_time >= 10:
+        start_time = time.time()
+
+        if count > 0:
+            temp_sum /= count
+            hum_sum /= count
+            soil_sum /= count
+
+            print(temp_sum, hum_sum, soil_sum)
+
+        temp_sum = hum_sum = soil_sum = count = 0
 
     time.sleep(0.05)

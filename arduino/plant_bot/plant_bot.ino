@@ -101,19 +101,6 @@ int getSoil() {
   return analogRead(SOILPIN);
 }
 
-void sendSensorValues() {
-  float temp = getTemperature();
-  float hum = getHumidity();
-  int soil = getSoil();
-
-  Serial.print("RETURNED:");
-  Serial.print(temp);
-  Serial.print(",");
-  Serial.print(hum);
-  Serial.print(",");
-  Serial.println(soil);
-}
-
 int pixelOffset(int size, int pos, bool flip) {
   return flip ? (size - 1 - pos) : pos;
 }
@@ -201,17 +188,28 @@ void handleButton() {
 }
 
 void update() {
+  float temp = getTemperature();
+  int hum = getHumidity();
+  int soil = getSoil();
+
   switch (current_sensor) {
-    case 0:
-      dtostrf(getTemperature(), 4, 2, current_value);
+    case TEMP:
+      dtostrf(temp, 4, 2, current_value);
       break;
-    case 1:
-      itoa(getHumidity(), current_value, 10);
+    case HUM:
+      itoa(hum, current_value, 10);
       break;
-    case 2:
-      itoa(getSoil(), current_value, 10);
+    case SOIL:
+      itoa(soil, current_value, 10);
       break;
   }
+
+  Serial.print("SENSOR_DATA:");
+  Serial.print(temp);
+  Serial.print(",");
+  Serial.print(hum);
+  Serial.print(",");
+  Serial.println(soil);
 }
 
 void draw() {
@@ -231,7 +229,7 @@ void draw() {
 }
 
 void loop() {
-  handleButton()
+  handleButton();
 
   if (millis() - lastUpdate >= interval) {
     lastUpdate = millis();
