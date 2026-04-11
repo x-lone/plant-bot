@@ -204,12 +204,14 @@ void update() {
       break;
   }
 
-  Serial.print("SENSOR_DATA:");
-  Serial.print(temp);
-  Serial.print(",");
-  Serial.print(hum);
-  Serial.print(",");
-  Serial.println(soil);
+  if (temp != -999 && hum != -1) {
+    Serial.print("SENSOR_DATA:");
+    Serial.print(temp);
+    Serial.print(",");
+    Serial.print(hum);
+    Serial.print(",");
+    Serial.println(soil); 
+  }
 }
 
 void draw() {
