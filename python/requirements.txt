@@ -1,0 +1,3 @@
+pyserial
+psycopg2-binary
+flask
