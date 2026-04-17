@@ -29,6 +29,10 @@ async function updateCharts() {
     createOrUpdateChart("temp", "tempChart", "Temperature", data.recent.timestamps, data.recent.temp);
     createOrUpdateChart("humi", "humiChart", "Humidity", data.recent.timestamps, data.recent.humi);
     createOrUpdateChart("soil", "soilChart", "Soil", data.recent.timestamps, data.recent.soil);
+
+    createOrUpdateChart("tempDaily", "tempDailyChart", "Temp (Daily Avg)", data.daily.days, data.daily.temp);
+    createOrUpdateChart("humiDaily", "humiDailyChart", "Humi (Daily Avg)", data.daily.days, data.daily.humi);
+    createOrUpdateChart("soilDaily", "soilDailyChart", "Soil (Daily Avg)", data.daily.days, data.daily.soil);
 }
 
 window.addEventListener("resize", () => {

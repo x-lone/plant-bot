@@ -26,6 +26,10 @@ def data():
     recent_rows = cursor.fetchall()
     recent_rows.reverse()
 
+    cursor.execute("SELECT AVG(temperature), AVG(humidity), AVG(soil), DATE(timestamp) FROM sensor_data GROUP BY DATE(timestamp) ORDER BY DATE(timestamp) DESC LIMIT 7")
+    daily_rows = cursor.fetchall()
+    daily_rows.reverse()
+
     cursor.close()
     conn.close()
 
@@ -35,6 +39,12 @@ def data():
             "humi": [r[1] for r in recent_rows],
             "soil": [r[2] for r in recent_rows],
             "timestamps": [r[3].strftime("%Y-%m-%d %H:%M") for r in recent_rows],
+        },
+        "daily": {
+            "temp": [r[0] for r in daily_rows],
+            "humi": [r[1] for r in daily_rows],
+            "soil": [r[2] for r in daily_rows],
+            "days": [str(r[3]) for r in daily_rows],
         }
     })
 

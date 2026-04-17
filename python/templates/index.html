@@ -14,6 +14,13 @@
         <div class="chart-box"><canvas id="soilChart"></canvas></div>
     </div>
 
+    <h2>Daily Averages</h2>
+    <div class="column">
+        <div class="chart-box-large"><canvas id="tempDailyChart"></canvas></div>
+        <div class="chart-box-large"><canvas id="humiDailyChart"></canvas></div>
+        <div class="chart-box-large"><canvas id="soilDailyChart"></canvas></div>
+    </div>
+
     <script src="{{ url_for('static', filename='charts.js') }}"></script>
 </body>
 </html>
