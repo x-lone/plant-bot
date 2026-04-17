@@ -1,0 +1,14 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+}
+
+.chart-box {
+    position: relative;
+    width: 33vw;
+}
