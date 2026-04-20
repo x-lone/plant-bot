@@ -6,19 +6,30 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h2>Recent Data</h2>
+    <div class="dashboard">
+        <h1>Plant Bot</h1>
 
-    <div class="row">
-        <div class="chart-box"><canvas id="tempChart"></canvas></div>
-        <div class="chart-box"><canvas id="humiChart"></canvas></div>
-        <div class="chart-box"><canvas id="soilChart"></canvas></div>
-    </div>
+        <div class="top-row">
+            <div class="daily-column">
+                <canvas id="tempDailyChart"></canvas>
+                <canvas id="humiDailyChart"></canvas>
+                <canvas id="soilDailyChart"></canvas>
+            </div>
 
-    <h2>Daily Averages</h2>
-    <div class="column">
-        <div class="chart-box-large"><canvas id="tempDailyChart"></canvas></div>
-        <div class="chart-box-large"><canvas id="humiDailyChart"></canvas></div>
-        <div class="chart-box-large"><canvas id="soilDailyChart"></canvas></div>
+            <div class="gif-box">
+                <div class="gif-frame">
+                    <img src="{{ url_for('static', filename='plant_animation.gif') }}">
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="bottom-row">
+            <div class="chart-box"><canvas id="tempChart"></canvas></div>
+            <div class="chart-box"><canvas id="humiChart"></canvas></div>
+            <div class="chart-box"><canvas id="soilChart"></canvas></div>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='charts.js') }}"></script>

@@ -2,6 +2,8 @@ import os
 from flask import Flask, jsonify, render_template
 import psycopg2
 
+plant = 'cake'
+
 app = Flask(__name__)
 
 def get_connection():
@@ -22,11 +24,11 @@ def data():
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT temperature, humidity, soil, timestamp FROM sensor_data ORDER BY timestamp DESC LIMIT 20")
+    cursor.execute("SELECT temperature, humidity, soil, timestamp FROM sensor_data WHERE plant_name = %s ORDER BY timestamp DESC LIMIT 20", (plant,))
     recent_rows = cursor.fetchall()
     recent_rows.reverse()
 
-    cursor.execute("SELECT AVG(temperature), AVG(humidity), AVG(soil), DATE(timestamp) FROM sensor_data GROUP BY DATE(timestamp) ORDER BY DATE(timestamp) DESC LIMIT 7")
+    cursor.execute("SELECT AVG(temperature), AVG(humidity), AVG(soil), DATE(timestamp) FROM sensor_data WHERE plant_name = %s GROUP BY DATE(timestamp) ORDER BY DATE(timestamp) DESC LIMIT 7", (plant,))
     daily_rows = cursor.fetchall()
     daily_rows.reverse()
 

@@ -65,8 +65,8 @@ while True:
 
                 with conn.cursor() as cur:
                     cur.execute(
-                        "INSERT INTO sensor_data (temperature, humidity, soil) VALUES (%s, %s, %s)",
-                        (avg_temp, avg_hum, avg_soil)
+                        "INSERT INTO sensor_data (plant_name, temperature, humidity, soil) VALUES (%s, %s, %s, %s)",
+                        ("cake", avg_temp, avg_hum, avg_soil)
                     )
                     conn.commit()
 

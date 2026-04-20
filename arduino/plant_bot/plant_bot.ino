@@ -3,10 +3,10 @@
 #include "DHT.h"
 
 #define BTNPIN 12
-const unsigned long debounceDelay = 50;
-unsigned long lastDebounceTime = 0;
-byte lastButtonState = HIGH;
-byte buttonState = HIGH;
+const unsigned long debounce_delay = 50;
+unsigned long last_debounce_time = 0;
+byte last_button_state = HIGH;
+byte button_state = HIGH;
 
 #define DHTPIN 9
 #define DHTTYPE DHT11
@@ -14,15 +14,27 @@ DHT dht(DHTPIN, DHTTYPE);
 
 #define SOILPIN A0
 
-#define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-#define MAX_DEVICES 4
-#define CS_PIN 3
-#define CLK_PIN 4
-#define DIN_PIN 2
+#define MAXDEVICES 4
+#define CSPIN 3
+#define CLKPIN 4
+#define DINPIN 2
+#define HARDWARETYPE MD_MAX72XX::FC16_HW
 
-MD_MAX72XX matrix = MD_MAX72XX(HARDWARE_TYPE, DIN_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
+MD_MAX72XX matrix = MD_MAX72XX(HARDWARETYPE, DINPIN, CLKPIN, CSPIN, MAXDEVICES);
 
 const byte A[6] PROGMEM = {0b00000000, 0b01000010, 0b00001000, 0b10000001, 0b01111110, 0b00000000};
+
+const byte plant_animation_bitmaps[4][8] PROGMEM = {
+  {0b00000000, 0b00011100, 0b00110100, 0b00101000, 0b00110000, 0b01100000, 0b01000000, 0b00110000},
+  {0b00000110, 0b00011010, 0b00010110, 0b00011100, 0b00010000, 0b00100000, 0b00100000, 0b00110000},
+  {0b00000000, 0b00001110, 0b00001011, 0b00001101, 0b00010011, 0b00010000, 0b00100000, 0b00110000},
+  {0b00000110, 0b00011010, 0b00010110, 0b00011100, 0b00010000, 0b00100000, 0b00100000, 0b00110000},
+};
+
+const unsigned long animation_interval = 1000;
+unsigned long last_animation = 0;
+
+int frame = 0;
 
 #define DIGIT_W 3
 #define DIGIT_H 4
@@ -37,7 +49,7 @@ const byte digit_bitmaps[10][4] PROGMEM = {
   {0b100, 0b111, 0b101, 0b111},
   {0b111, 0b001, 0b010, 0b010},
   {0b111, 0b101, 0b111, 0b111},
-  {0b111, 0b101, 0b111, 0b001}
+  {0b111, 0b101, 0b111, 0b001},
 };
 
 #define LETTER_W 3
@@ -72,8 +84,8 @@ const byte letter_bitmaps [26][3] PROGMEM = {
   {0b110, 0b010, 0b011}
 };
 
-const unsigned long interval = 1000;
-unsigned long lastUpdate = 0;
+const unsigned long update_interval = 1000;
+unsigned long last_update = 0;
 
 enum SensorType { TEMP, HUM, SOIL };
 byte current_sensor = TEMP;
@@ -154,7 +166,10 @@ void setup() {
   matrix.begin();
   matrix.control(MD_MAX72XX::INTENSITY, 1);
   matrix.clear();
-  drawBitmap(A, 8, 6, 0, 0);
+
+  drawWord("PLANT", 1, 5);
+  drawWord("BOT", 1, 0);
+  drawBitmap(A, 8, 6, 20, 0);
 
   pinMode(BTNPIN, INPUT_PULLUP);
 
@@ -166,25 +181,23 @@ void setup() {
 void handleButton() {
   int reading = digitalRead(BTNPIN);
 
-  if (reading != lastButtonState) {
-    lastDebounceTime = millis();
+  if (reading != last_button_state) {
+    last_debounce_time = millis();
   }
 
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    if (reading != buttonState) {
-      buttonState = reading;
+  if ((millis() - last_debounce_time) > debounce_delay) {
+    if (reading != button_state) {
+      button_state = reading;
 
-      if (buttonState == LOW) {
+      if (button_state == LOW) {
         current_sensor = (current_sensor + 1) % 3;
 
-        lastUpdate = millis();
-        update();
-        draw();
+        last_update = 0;
       }
     }
   }
 
-  lastButtonState = reading;
+  last_button_state = reading;
 }
 
 void update() {
@@ -220,12 +233,14 @@ void draw() {
   matrix.clear();
 
   switch (current_sensor) {
-    case TEMP: drawWord("TEMP", 0, 5); break;
-    case HUM: drawWord("HUM", 0, 5); break;
-    case SOIL: drawWord("SOIL", 0, 5); break;
+    case TEMP: drawWord("TEMP", 1, 5); break;
+    case HUM: drawWord("HUM", 1, 5); break;
+    case SOIL: drawWord("SOIL", 1, 5); break;
   }
 
-  drawNumber(current_value, 0, 0);
+  drawBitmap(plant_animation_bitmaps[frame], 8, 8, 20, 0);
+
+  drawNumber(current_value, 1, 0);
 
   matrix.control(MD_MAX72XX::UPDATE, MD_MAX72XX::ON);
 }
@@ -233,8 +248,13 @@ void draw() {
 void loop() {
   handleButton();
 
-  if (millis() - lastUpdate >= interval) {
-    lastUpdate = millis();
+  if (millis() - last_animation >= animation_interval) {
+    last_animation = millis();
+    frame = (frame + 1) % 4;
+  }
+
+  if (millis() - last_update >= update_interval) {
+    last_update = millis();
 
     update();
     draw();
